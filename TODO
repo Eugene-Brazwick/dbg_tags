@@ -1,0 +1,16 @@
+
+DONE 0001 2020-11-18
+  Tag.enable x: :err
+
+  also enables generic: :trc
+  WHY? This is confusing???
+
+  ALSO:     Tag.enable :val
+  sets generic to :trc, but then does trc: :val.
+
+  Since we can say Tag.trc 'bla'
+  I also expect Tag.enable :trc
+  to work...
+
+DONE 0002 2022-03-10
+  17 examples

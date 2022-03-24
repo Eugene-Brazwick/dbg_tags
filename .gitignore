@@ -1,0 +1,10 @@
+.*.sw[op]
+*.odt#
+pkg
+core
+t
+html
+ext/librb++/Makefile
+coverage/
+.tmp/
+tmp/
