@@ -1,4 +1,9 @@
 
+FREE 0004
+
+==========================================
+==========================================
+
 DONE 0001 2020-11-18
   Tag.enable x: :err
 
@@ -14,3 +19,8 @@ DONE 0001 2020-11-18
 
 DONE 0002 2022-03-10
   17 examples
+
+DONE 0003 2022-03-25. 
+  gem description loses newlines on rubygem.org.
+  Must be shorter, or fixed.
+

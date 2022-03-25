@@ -9,32 +9,8 @@ spec = Gem::Specification.new do |s|
   s.name = PACKAGE
   s.summary = 'a versatile dynamic debug tracing system'
   s.description = <<~END
-      tags in your code can be switched on using features and levels.
-      Examples:
-      Tag.trc 'a message' # a :generic tag
-        # All tags print sourcefile, current method and linenumber automatically
-      Tag.trc # prints file, method and linenumber
-      Tag.trc :feature, 'a message' # only called if :feature enabled.
-      Tag.err 'msg' # Triggered when :generic feature is set to at 
-                    # least :err level.
-                    # The levels are :err, :log, :trc, :val and :dtl, 
-                    # in that order
-      Tag.dtl :complex do "val = \#{expensive.method.call}" end
-      Tag.dtl(:complex) { "val = \#{expensive.method.call}" }
-	  # use lazy evaluation with a block.
-          # The block expression is printed using to_s.
-      Tag.dtl(:complex) {} # same as Tag.dtl :complex 
-# At the start of your application enable the desired dump-level.
-      Tag.enable	# Same as Tag.enable generic: :trc
-                        # That is enables levels <=:trc
-      Tag.enable :val   # enable :generic tags at <=:val levels
-      Tag.enable :feature1, :feat2, ... # enables given features on <=:trc
-      Tag.enable :feature1, :feat2, feat3: :dtl, all: :err
-	# Set :feature1, :feat2, and :generic to <=:trc, :feat3 to :dtl
-	# and ANY OTHER feature to only :err. 
-      Tag.enable feature: :err 
-      Tag.enable feature: :dtl # so ALL tags with feature :feature
-      Tag.err(:feature) { raise 'aaaarg' if expensive_check_fails? }
+      debug 'tags' in your code can be switched on/off using features and levels.
+      See README.md
 END
   s.version = '1.0.0'
   s.author = 'Eugene Brazwick'
