@@ -1,5 +1,5 @@
 
-FREE 0004
+FREE 0005
 
 ==========================================
 ==========================================
@@ -21,6 +21,25 @@ DONE 0002 2022-03-10
   17 examples
 
 DONE 0003 2022-03-25. 
-  gem description loses newlines on rubygem.org.
+  gem description loses newlines on rubygem.org. This is STUPID!
   Must be shorter, or fixed.
+
+fixed 0004 2023-08-13 A nested Tag.enable should not lower the level of an
+  outer one.
+  Tag.enable system: :dtl do
+    .....
+
+    Tag.enable system: :err do
+      # should still be detail!
+    end
+  end
+  Examples. Put Tag.enable :dtl on top of _spec file.
+  Then individual examples that have Tag.enable :nil .... 
+  will remain silent which is not the intention.
+  If they RAISE the level it will be fine though.
+  NOTE: raise version of gem as this is kind of incompatible...
+  Can make it remain compatible and more clear and more flexible:
+  Tag.enable system: '>=err'
+  ``Make sure the tag level is >= err here''
+  I am a genious, after all.
 

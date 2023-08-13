@@ -178,4 +178,89 @@ describe 'tag' do
   # however, it only works with LAZY calls. 
   # def to_s; Tag.trc "HERE in #{self}"; super; end 
   # will OBVIOUSLY cause a stack overflow.
+  #
+
+  context 'Nested levels' do
+    it 'overwrites the level set in outer temporarily (tag_200)' do
+      Tag.enable nest: :val do
+          expect(Tag.level :nest).to be Tag::VAL
+        Tag.enable nest: 'trc' do
+          expect(Tag.level :nest).to be Tag::TRC
+        end
+        expect(Tag.level :nest).to be Tag::VAL
+      end
+    end # it
+
+    it 'raises the level set in outer temporarily if >= is used (tag_201)' do
+      Tag.enable nest: :err do
+          expect(Tag.level :nest).to be Tag::ERR
+        Tag.enable nest: '>=trc' do
+          expect(Tag.level :nest).to be Tag::TRC
+        end
+        expect(Tag.level :nest).to be Tag::ERR
+      end
+    end # it
+
+    it 'ONLY raises the level set in outer temporarily if >= is used (tag_202)' do
+      Tag.enable nest: :trc do
+          expect(Tag.level :nest).to be Tag::TRC
+        Tag.enable nest: '>=err' do
+          expect(Tag.level :nest).to be Tag::TRC
+        end
+        expect(Tag.level :nest).to be Tag::TRC
+      end
+    end # it
+
+    it 'raises the level set in outer temporarily if >= is used (tag_201.b)' do
+      Tag.enable :err do
+          expect(Tag.level Tag::TAG_FEATURE_GENERIC).to be Tag::ERR
+        Tag.enable '>=trc' do
+          expect(Tag.level Tag::TAG_FEATURE_GENERIC).to be Tag::TRC
+        end
+        expect(Tag.level Tag::TAG_FEATURE_GENERIC).to be Tag::ERR
+      end
+    end # it
+
+    it 'ONLY raises the level set in outer temporarily if >= is used (tag_202.b)' do
+      Tag.enable :trc do
+          expect(Tag.level Tag::TAG_FEATURE_GENERIC).to be Tag::TRC
+        Tag.enable nest: '>=err' do
+          expect(Tag.level Tag::TAG_FEATURE_GENERIC).to be Tag::TRC
+        end
+        expect(Tag.level Tag::TAG_FEATURE_GENERIC).to be Tag::TRC
+      end
+    end # it
+
+    it 'takes :all into consideration when >= is used (tag_205)' do
+      Tag.enable all: :log do
+          expect(Tag.level :nest).to be Tag::LOG
+        Tag.enable nest: '>=err' do
+          expect(Tag.level :nest).to be Tag::LOG
+        end
+        expect(Tag.level :nest).to be Tag::LOG
+        Tag.enable nest: '>=trc' do
+          expect(Tag.level :nest).to be Tag::TRC
+        end
+        expect(Tag.level :nest).to be Tag::LOG
+      end
+    end # it
+  end # context 'Nested levels'
+
+  it 'does not allow levels out of range (tag_900)' do
+    expect do
+      Tag.enable nest: 24
+    end.to raise_error ArgumentError, /bad level/i
+    expect do
+      Tag.enable nest: -2
+    end.to raise_error ArgumentError, /bad level/i
+  end # it
+
+  it 'does not allow made up levels (tag_901)' do
+    expect do
+      Tag.enable nest: :foo
+    end.to raise_error ArgumentError, /bad level/i
+    expect do
+      Tag.enable nest: '>=foo'
+    end.to raise_error ArgumentError, /bad level/i
+  end # it
 end # describe

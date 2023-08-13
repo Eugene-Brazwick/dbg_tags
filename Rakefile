@@ -12,7 +12,7 @@ spec = Gem::Specification.new do |s|
       debug 'tags' in your code can be switched on/off using features and levels.
       See README.md
 END
-  s.version = '1.0.0'
+  s.version = '1.0.1'
   s.author = 'Eugene Brazwick'
   s.email = 'eugenebrazwick@gmail.com'
   s.homepage = 'https://github.com/Eugene-Brazwick/dbg_tags'
@@ -42,14 +42,20 @@ Gem::PackageTask.new(spec).define
 task default: :gem 
 
 # LOCALLY only, altough it seems to try to connect to rubygems.org...
+# use 'sudo rake install' or 'su -c "rake install"'
 task :install do
-  `sudo gem uninstall ./pkg/#{GEM}`
-  `sudo gem install ./pkg/#{GEM}`
+  #   sh "chmod -R o+r ./pkg/ ./spec" # fix issues with my anti ransomware settings. But it does not work????
+  #   Because when I say 'sudo rake install' is still uses umask 0027!
+  #   sh "umask 0022"       THIS FAILS with code 127. So use 'sudo -i; cd ...; umask 0022; rake install'  AARGH.
+  # To be on the safe side just use rm -rf pkg; rake gem install 
+  sh "gem uninstall ./pkg/#{GEM}"
+  sh "gem install --local ./pkg/#{GEM}"
+  # without --local it tries to download the online version, which is the old one normally...
 end
 
 # publish it...
 task :push do
-  `gem push ./pkg/#{GEM}`
+  sh "gem push ./pkg/#{GEM}"
 end
 __END__
 
