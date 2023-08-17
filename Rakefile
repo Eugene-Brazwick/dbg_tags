@@ -12,7 +12,7 @@ spec = Gem::Specification.new do |s|
       debug 'tags' in your code can be switched on/off using features and levels.
       See README.md
 END
-  s.version = '1.0.1'
+  s.version = '1.0.2'
   s.author = 'Eugene Brazwick'
   s.email = 'eugenebrazwick@gmail.com'
   s.homepage = 'https://github.com/Eugene-Brazwick/dbg_tags'
