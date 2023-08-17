@@ -140,7 +140,7 @@ module Tag
   class << self
     private # class methods of Tag
 
-    # @param level_spec [Integer,Symbol,String]
+    # @param level_spec [Integer,Symbol,String,nil]
     # @param feature [Symbol]
     # @return [0..5]
     def debunk_level level_spec, feature
@@ -148,6 +148,7 @@ module Tag
 # OK    STDERR.puts "DEBUNK: level_spec=#{level_spec.inspect}, feature=#{feature.inspect}"
       case level_spec
       when 0..5 then return level_spec 
+      when nil then return NONE
       when Symbol
         r = TAG_MAPPING[level_spec] and return r 
       when /\A(err|log|trc|val|dtl)\z/

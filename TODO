@@ -1,5 +1,5 @@
 
-FREE 0005
+FREE 0006
 
 ==========================================
 ==========================================
@@ -42,4 +42,7 @@ fixed 0004 2023-08-13 A nested Tag.enable should not lower the level of an
   Tag.enable system: '>=err'
   ``Make sure the tag level is >= err here''
   I am a genious, after all.
+
+fixed 0005 2023-08-17 BUG: 'Tag.enable feature: nil' no longer worked.
+  Spec missing too...
 

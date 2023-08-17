@@ -175,6 +175,12 @@ describe 'tag' do
     end
   end
 
+  it 'is allowed to use nil for :nil in enable (tag_110)' do
+    Tag.enable feature: nil do
+      expect(Tag.enabled[:feature]).to eq Tag::NONE
+    end
+  end # it
+
   # however, it only works with LAZY calls. 
   # def to_s; Tag.trc "HERE in #{self}"; super; end 
   # will OBVIOUSLY cause a stack overflow.
