@@ -4,6 +4,7 @@ require 'rake'
 
 RUBY = 'ruby -w -I lib'
 PACKAGE = 'dbg_tags'
+VERSION = '1.1.0'
 
 spec = Gem::Specification.new do |s|
   s.name = PACKAGE
@@ -12,12 +13,12 @@ spec = Gem::Specification.new do |s|
       debug 'tags' in your code can be switched on/off using features and levels.
       See README.md
 END
-  s.version = '1.0.2'
+  s.version = VERSION
   s.author = 'Eugene Brazwick'
   s.email = 'eugenebrazwick@gmail.com'
   s.homepage = 'https://github.com/Eugene-Brazwick/dbg_tags'
   s.platform = Gem::Platform::RUBY
-  s.required_ruby_version = '>=2.7'
+  s.required_ruby_version = '>=3.0'
   s.add_development_dependency 'rspec', '~>3.4'
   s.add_development_dependency 'rake', '~>10.4'
   s.add_development_dependency 'simplecov', '~>0.18'

@@ -252,6 +252,44 @@ describe 'tag' do
     end # it
   end # context 'Nested levels'
 
+  it 'has thread local data to prevent mix ups (tag_300)' do
+    t1 = Thread.new do
+      Tag.enable threads: :trc do
+        Tag.trc(:threads) {
+          expect(Tag.inside?).to be true
+          sleep 1
+          nil
+        }
+      end
+    end 
+    t2 = Thread.new do
+      sleep 0.2
+      expect(Tag.enabled).to eq({})
+      expect(Tag.inside?).to be false
+    end 
+    t1.join
+    t2.join
+  end # it
+
+  it 'each thread has a private tag system (tag_301)' do
+    Tag.enable threads: :trc do
+      expect(Tag.enabled).to eq({threads: 3})
+      t1 = Thread.new do
+        expect(Tag.enabled).to eq({})
+        Tag.enable threads: :log do
+          expect(Tag.enabled).to eq({threads: 2})
+          Tag.trc(:threads) {
+            expect(Tag.inside?).to be true
+            sleep 1
+            nil
+          }
+        end
+      end 
+      t1.join
+      expect(Tag.enabled).to eq({threads: 3})
+    end
+  end # it
+
   it 'does not allow levels out of range (tag_900)' do
     expect do
       Tag.enable nest: 24
@@ -269,4 +307,5 @@ describe 'tag' do
       Tag.enable nest: '>=foo'
     end.to raise_error ArgumentError, /bad level/i
   end # it
+
 end # describe

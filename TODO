@@ -1,5 +1,22 @@
 
-FREE 0006
+0007 STATE DATE **** NEXT FREE ENTRY ****
+
+0006 FIXME 2024-05-06 In a multithreaded application the @@inside
+  flag can be 'up' incorrectly. The same is true for @@enabled
+  obviously.
+  This is not entirely horrible or unavoidable at this point.
+  It just means that other threads may start outputting or hiding
+  tags, while they technically should not.
+  We can 'fix' this by using Thread.current[:dbg_tags_enabled] and
+  Thread.current[:dbg_tags_inside] instead (use Thread.current.keys
+  to see which data is stored).
+  Or better use a GlobalState instance. and :dbg_tags_global_state
+  as the ONLY key.
+  The only drawback is that Thread[:dbg_tags_global_state] is never
+  deleted.
+  Another problem is that Thread.new causes any tags enabled to be
+  ignored. This is OK. The Thread should just call Tag.enable 
+  itself.
 
 ==========================================
 ==========================================

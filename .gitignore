@@ -8,3 +8,5 @@ ext/librb++/Makefile
 coverage/
 .tmp/
 tmp/
+doc/
+.yardoc
