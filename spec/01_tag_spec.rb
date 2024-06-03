@@ -1,6 +1,8 @@
 
-require 'simplecov'
-SimpleCov.start
+if t = ENV['USE_SIMPLECOV'] and !t.empty?
+  require 'simplecov'
+  SimpleCov.start { add_filter '/spec/' }
+end
 
 require_relative '../lib/dbg_tags'
 
@@ -9,7 +11,7 @@ class Pathological
     Tag.trc { "HERE in #{self}!" }
     super
   end # to_s
-end 
+end # class Pathological
 
 describe 'tag' do
   before :each do
@@ -288,6 +290,61 @@ describe 'tag' do
       t1.join
       expect(Tag.enabled).to eq({threads: 3})
     end
+  end # it
+
+  it 'each fiber has a private tag system (tag_302)' do
+    Tag.enable threads: :trc do
+      expect(Tag.enabled).to eq({threads: 3})
+      t1 = Fiber.new do
+        expect(Tag.enabled).to eq({})
+        Tag.enable threads: :log do
+          expect(Tag.enabled).to eq({threads: 2})
+          Tag.trc(:threads) {
+            expect(Tag.inside?).to be true
+            sleep 1
+            nil
+          }
+        end
+      end 
+      t1.resume
+      expect(Tag.enabled).to eq({threads: 3})
+    end
+  end # it
+
+  it 'does allow restore_state to transfer state through a Fiber barrier (tag_310)' do
+    did_something = false
+    Tag.enable example: :dtl, fiber: :trc do
+      state = Tag.state # same as Tag.enabled
+      expect(state).to eq({example: Tag::DTL, fiber: Tag::TRC})
+      t1 = Fiber.new do
+        expect(Tag.state).to eq({})
+        Tag.enable foo: :trc
+        Tag.restore_state state do
+          expect(Tag.state).to eq({example: Tag::DTL, fiber: Tag::TRC})
+          did_something = true
+        end
+      end
+      t1.resume
+      expect(Tag.state).to eq({example: Tag::DTL, fiber: Tag::TRC})
+    end # enable
+    expect(did_something).to be true
+  end # it
+
+  it 'does allow a nil-state to transfer state through a Fiber barrier (tag_311)' do
+    did_something = false
+    state = Tag.state
+    expect(state).to eq({})
+    t1 = Fiber.new do
+      expect(Tag.state).to eq({})
+      Tag.enable foo: :trc
+      Tag.restore_state state do
+        expect(Tag.state).to eq({})
+        did_something = true
+      end
+    end
+    t1.resume
+    expect(Tag.state).to eq({})
+    expect(did_something).to be true
   end # it
 
   it 'does not allow levels out of range (tag_900)' do

@@ -130,7 +130,7 @@ module Tag
     #
     # enable performs a merge with an existing enable.
     def enable *features, **opts
-      org_enabled = @enabled.dup # to restore the state at the end (unused unless block_given)
+      org_enabled = @enabled.clone # to restore the state at the end (unused unless block_given)
       features.each do |feature|
         case feature
         when 0..5 # not a feature, apply to :generic
@@ -162,6 +162,21 @@ module Tag
         end # ensure
       end # block_given?
     end # GlobalState.enable
+
+    # @param state [{Symbol=>0..5}] As returned by Tag.state (aka Tag.enabled)
+    # A block can be given to restore the original state afterwards.
+    # restore_state overwrites any existing enabled feature.
+    def restore_state state
+      org_enabled = @enabled.clone # to restore the state at the end (unused unless block_given)
+      @enabled = state.dup
+      if block_given?
+        begin
+          yield
+        ensure
+          @enabled = org_enabled
+        end # ensure
+      end # block_given?
+    end # GlobalState.restore_state
 
     # @param feature [Symbol]
     # @return [0..5] Current effective level for feature.
@@ -240,8 +255,12 @@ module Tag
     # @see GlobalState.enable
     def enable(...); global_state.enable(...); end
 
+    # @see GlobalState.restore_state
+    def restore_state(...); global_state.restore_state(...); end
+
     # @return [{Symbol=>0..5}] Keys are the features
     def enabled; global_state.enabled; end
+    alias state enabled
 
     # @return [IO] By default this is STDERR
     def stream; global_state.stream; end

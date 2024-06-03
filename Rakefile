@@ -1,10 +1,11 @@
 
 require 'rubygems/package_task'
 require 'rake'
+require 'rspec/core/rake_task'
 
 RUBY = 'ruby -w -I lib'
 PACKAGE = 'dbg_tags'
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
 spec = Gem::Specification.new do |s|
   s.name = PACKAGE
@@ -62,6 +63,16 @@ end
 task :push_github do
   sh "git push ssh://git@github.com/Eugene-Brazwick/dbg_tags"
 end 
+
+desc 'Run all specs with simplecov'
+RSpec::Core::RakeTask.new :coverage do |t|
+  t.rspec_opts = ['--color']
+  t.ruby_opts = ['-W0']
+  t.pattern = FileList['spec/*_spec.rb']
+  ENV['USE_SIMPLECOV'] = '1'
+  true
+end # new
+
 __END__
 
 sudo gem install rake	  # to install rake. This file needs it...
