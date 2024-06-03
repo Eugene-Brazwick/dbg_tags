@@ -55,9 +55,13 @@ task :install do
 end
 
 # publish it...
-task :push do
+task :push_gem do
   sh "gem push ./pkg/#{GEM}"
 end
+
+task :push_github do
+  sh "git push ssh://git@github.com/Eugene-Brazwick/dbg_tags"
+end 
 __END__
 
 sudo gem install rake	  # to install rake. This file needs it...
