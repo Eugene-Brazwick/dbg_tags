@@ -255,6 +255,7 @@ describe 'tag' do
   end # context 'Nested levels'
 
   it 'has thread local data to prevent mix ups (tag_300)' do
+    Tag.enable_fiber_local_state # NOTE enabled by default, but other examples may botch it
     t1 = Thread.new do
       Tag.enable threads: :trc do
         Tag.trc(:threads) {
@@ -274,44 +275,74 @@ describe 'tag' do
   end # it
 
   it 'each thread has a private tag system (tag_301)' do
+    Tag.enable_fiber_local_state # NOTE enabled by default, but other examples may botch it
+    executed = false
     Tag.enable threads: :trc do
-      expect(Tag.enabled).to eq({threads: 3})
+      expect(Tag.enabled).to eq({threads: Tag::TRC})
       t1 = Thread.new do
         expect(Tag.enabled).to eq({})
         Tag.enable threads: :log do
-          expect(Tag.enabled).to eq({threads: 2})
-          Tag.trc(:threads) {
+          expect(Tag.enabled).to eq({threads: Tag::LOG})
+          Tag.log(:threads) {
             expect(Tag.inside?).to be true
             sleep 1
+            executed = true
             nil
           }
         end
       end 
       t1.join
-      expect(Tag.enabled).to eq({threads: 3})
+      expect(Tag.enabled).to eq({threads: Tag::TRC})
     end
+    expect(executed).to be true
   end # it
 
   it 'each fiber has a private tag system (tag_302)' do
+    Tag.enable_fiber_local_state # NOTE enabled by default, but other examples may botch it
+    executed = false
     Tag.enable threads: :trc do
-      expect(Tag.enabled).to eq({threads: 3})
+      expect(Tag.enabled).to eq({threads: Tag::TRC})
       t1 = Fiber.new do
         expect(Tag.enabled).to eq({})
         Tag.enable threads: :log do
-          expect(Tag.enabled).to eq({threads: 2})
-          Tag.trc(:threads) {
+          expect(Tag.enabled).to eq({threads: Tag::LOG})
+          Tag.log(:threads) {
             expect(Tag.inside?).to be true
-            sleep 1
+            executed = true
             nil
           }
         end
       end 
       t1.resume
-      expect(Tag.enabled).to eq({threads: 3})
+      expect(Tag.enabled).to eq({threads: Tag::TRC})
+    end
+    expect(executed).to be true
+  end # it
+
+  it 'allows to disable fiber local state (tag_305)' do
+    Tag.disable_fiber_local_state
+    executed = false
+    Tag.enable threads: :trc do
+      expect(Tag.enabled).to eq({threads: Tag::TRC})
+      t1 = Fiber.new do
+        expect(Tag.enabled).to eq({threads: Tag::TRC})
+        Tag.enable threads: :log do
+          expect(Tag.enabled).to eq({threads: Tag::LOG})
+          Tag.log(:threads) {
+            expect(Tag.inside?).to be true
+            executed = true
+            nil
+          }
+        end
+      end 
+      t1.resume
+      expect(Tag.enabled).to eq({threads: Tag::TRC})
+      expect(executed).to be true
     end
   end # it
 
   it 'does allow restore_state to transfer state through a Fiber barrier (tag_310)' do
+    Tag.enable_fiber_local_state
     did_something = false
     Tag.enable example: :dtl, fiber: :trc do
       state = Tag.state # same as Tag.enabled
@@ -331,6 +362,7 @@ describe 'tag' do
   end # it
 
   it 'does allow a nil-state to transfer state through a Fiber barrier (tag_311)' do
+    Tag.enable_fiber_local_state
     did_something = false
     state = Tag.state
     expect(state).to eq({})

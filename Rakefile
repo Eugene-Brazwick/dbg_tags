@@ -5,7 +5,7 @@ require 'rspec/core/rake_task'
 
 RUBY = 'ruby -w -I lib'
 PACKAGE = 'dbg_tags'
-VERSION = '1.1.1'
+VERSION = '1.1.2'
 
 spec = Gem::Specification.new do |s|
   s.name = PACKAGE

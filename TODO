@@ -1,22 +1,5 @@
 
-0008 STATE DATE **** NEXT FREE ENTRY ****
-
-0006 FIXME 2024-05-06 In a multithreaded application the @@inside
-  flag can be 'up' incorrectly. The same is true for @@enabled
-  obviously.
-  This is not entirely horrible or unavoidable at this point.
-  It just means that other threads may start outputting or hiding
-  tags, while they technically should not.
-  We can 'fix' this by using Thread.current[:dbg_tags_enabled] and
-  Thread.current[:dbg_tags_inside] instead (use Thread.current.keys
-  to see which data is stored).
-  Or better use a GlobalState instance. and :dbg_tags_global_state
-  as the ONLY key.
-  The only drawback is that Thread[:dbg_tags_global_state] is never
-  deleted.
-  Another problem is that Thread.new causes any tags enabled to be
-  ignored. This is OK. The Thread should just call Tag.enable 
-  itself.
+0009 STATE DATE **** NEXT FREE ENTRY ****
 
 ==========================================
 ==========================================
@@ -63,10 +46,38 @@ fixed 0004 2023-08-13 A nested Tag.enable should not lower the level of an
 fixed 0005 2023-08-17 BUG: 'Tag.enable feature: nil' no longer worked.
   Spec missing too...
 
+0006 fixed 2024-05-06 
+  In a multithreaded application the @@inside
+  flag can be 'up' incorrectly. The same is true for @@enabled
+  obviously.
+  This is not entirely horrible or unavoidable at this point.
+  It just means that other threads may start outputting or hiding
+  tags, while they technically should not.
+  We can 'fix' this by using Thread.current[:dbg_tags_enabled] and
+  Thread.current[:dbg_tags_inside] instead (use Thread.current.keys
+  to see which data is stored).
+  Or better use a GlobalState instance. and :dbg_tags_global_state
+  as the ONLY key.
+  The only drawback is that Thread[:dbg_tags_global_state] is never
+  deleted.
+  Another problem is that Thread.new causes any tags enabled to be
+  ignored. This is OK. The Thread should just call Tag.enable 
+  itself.
+
 0007 fixed 2024-06-03 2024-06-04
   If 'enable' is never called and 'state' is called it
   returns '{}' which is correct.
   But if you then call 'Tag.enable(**stored_state)' it will enable generic: :trc.
   We need Tag.restore_state(stored_state) instead.
   I need this because Fiber.new drops the Tag state inside of it.
+
+0008 fixed 2024-06-06 Fix 6 still causes issues. Now I have an application
+  using fibers, but no threads.
+  I was under the impression that Thread[:key] was thread-local, but it
+  works on any Fiber.
+  So it would be better that Tag did NOT use fiber-local data as getting
+  Tags to work inside the fiber for rspec-examples is a complete hassle.
+  So it must become a switch.
+  Still, if Fibers and Threads are mixed this is clearly not working,
+  but I doubt that would be a very practicle idea anyway.
 

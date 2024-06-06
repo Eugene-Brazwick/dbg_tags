@@ -187,14 +187,31 @@ module Tag
 
   class << self
 
+    private # class methods of Tag
+
+    # @param value [Bool] Value to set
+    # Primarily for rspec stuff. Use {disable_fiber_local_state!} instead
+    def no_fiber_local_state= value
+      @no_fiber_local_state = value
+    end # Tag::no_fiber_local_state=
+
     public # class methods of Tag
 
-    # @return [GlobalState] Thread local data 
+    # @return [Bool,nil] True if we should store global state inside the Tag class itself.
+    attr :no_fiber_local_state
+    alias no_fiber_local_state? no_fiber_local_state
+
+    # @return [Bool] True (the default) if we should store global state
+    # in each fiber/thread of the application.
+    def use_fiber_local_state?; !no_fiber_local_state? end
+
+    # @return [GlobalState] Either fiber local data (default) or truly global.
     def global_state
-      if gs = Thread.current[:dbg_tags_global_state]
-        gs
+      if @no_fiber_local_state # testing undefined ivar here. But no warnings... That is good,
+          # at least for performance
+        @global_state ||= GlobalState.new
       else
-        Thread.current[:dbg_tags_global_state] = GlobalState.new
+        Thread.current[:dbg_tags_global_state] ||= GlobalState.new
       end
     end # Tag::global_state
 
@@ -277,6 +294,21 @@ module Tag
     # @param feature [Symbol]
     # @return [bool] Reflects explicit enable calls only. The :all feature is IGNORED
     def enabled? feature; (global_state.enabled[feature] || NONE) > NONE; end
+
+    # shortcut for no_fiber_local_state := true
+    # By default fiber local state is enabled but this means that
+    # 'enabling' of tags in some fiber does not work in others.
+    # Or more specific, that changing the Tag state outside of any fiber
+    # does not effect any fibers (already) created.
+    # Now it is possible to transfer data into the fiber using 'resume'
+    # but this is a hassle.
+    # So: when using threads leave this enabled, as it will cause race conditions.
+    # when using fibers, but no threads it is probably convenient to disable it.
+    def disable_fiber_local_state; self.no_fiber_local_state = true end
+
+    # shortcut for no_fiber_local_state := false
+    # For rspec use mostly.
+    def enable_fiber_local_state; self.no_fiber_local_state = false end
 
   end # singleton class Tag
 end # module Tag
